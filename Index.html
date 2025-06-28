@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FitTracker Pro">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB4PSI0MCIgeT0iNDAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IndoaXRlIj4KICA8cGF0aCBkPSJtMjEgN2gtNGwtMi05aC02bC0yIDloLTRsMi05LTItOWg2bDIgOXoiLz4KPC9zdmc+Cjwvc3ZnPg==">
+    <title>FitTracker Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1em;
+        }
+
+        .nav-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 0 5px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 12px 8px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .nav-btn:hover, .nav-btn:active {
+            background: white;
+            transform: scale(0.98);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn.active {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .page {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(33,150,243,0.07);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .stat-number {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 10px;
+            min-height: 50px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 14px;
+            width: auto;
+            margin: 0 5px 5px 0;
+            min-height: 40px;
+        }
+
+        .exercise-list {
+            margin-top: 20px;
+        }
+
+        .exercise-item {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .exercise-item h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .exercise-sets {
+            display: grid;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .set-input {
+            display: grid;
+            grid-template-columns: auto 1fr auto 1fr auto auto;
+            gap: 8px;
+            align-items: center;
+            background: white;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .set-input input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .set-input span {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .timer-display {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 15px 0;
+            font-size: 2em;
+            font-weight: bold;
+            display: none;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .prediction-box {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+        }
+
+        .prediction-box h4 {
+            margin-bottom: 8px;
+        }
+
+        .workout-history {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #2196F3;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .program-list {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .program-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        .program-card.favorite {
+            border-left: 4px solid #FFD700;
+        }
+
+        .sport-category {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .sport-category h4 {
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .exercise-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .exercise-btn {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .exercise-btn:active {
+            background: #e3f2fd;
+            border-color: #2196F3;
+        }
+
+        .exercise-btn.selected {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        .weight-tracker {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .bmi-display {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .meal-suggestion {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+        }
+
+        .floating-timer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #FF9800;
+            color: white;
+            padding: 15px;
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+            z-index: 1000;
+            font-size: 1.2em;
+            font-weight: bold;
+            min-width: 60px;
+            min-height: 60px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .timer-settings {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .set-completed {
+            background: #e8f5e8 !important;
+            border-left-color: #4CAF50;
+        }
+
+        .set-completed .btn-small {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .sets-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .sets-table th, .sets-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 1em;
+        }
+        .sets-table th {
+            background: #f8f9fa;
+            color: #4CAF50;
+            font-weight: 700;
+        }
+        .sets-table tr:last-child td {
+            border-bottom: none;
+        }
+        .sets-table input[type="number"] {
+            font-size: 1em;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            width: 60px;
+            text-align: center;
+        }
+        .sets-table input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            accent-color: #4CAF50;
+            cursor: pointer;
+        }
+        .sets-table .set-completed td {
+            background: #e8f5e8;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(33,150,243,0.06);
+            margin-bottom: 10px;
+            font-size: 0.97em;
+        }
+        .history-table th, .history-table td {
+            padding: 8px 6px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .history-table th {
+            background: #f8f9fa;
+            color: #2196F3;
+            font-weight: 700;
+        }
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }
+        .history-table td {
+            color: #333;
+        }
+        .history-table td:last-child {
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 5px;
+            }
+            
+            .header {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .nav-buttons {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            
+            .nav-btn {
+                font-size: 0.8em;
+                padding: 10px 5px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .page {
+                padding: 15px;
+                border-radius: 15px;
+            }
+            
+            .set-input {
+                grid-template-columns: auto 1fr auto 1fr auto;
+                gap: 5px;
+                padding: 10px;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-btn {
+                padding: 12px;
+                font-size: 0.9em;
+            }
+            
+            .exercise-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .set-input {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                text-align: center;
+            }
+            
+            .set-input span {
+                display: none;
+            }
+        }
+
+        /* iOS Safari specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            .nav-btn, .btn {
+                -webkit-appearance: none;
+                appearance: none;
+                border-radius: 15px;
+            }
+            
+        }
+
+        /* Android Chrome specific fixes */
+        @media screen and (-webkit-min-device-pixel-ratio: 0) {
+            select {
+                background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23666' d='m2 0-2 2h4zm0 5 2-2h-4z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 12px center;
+                background-size: 12px;
+                padding-right: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💪 FitTracker Pro</h1>
+            <p>Votre coach personnel de musculation</p>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showPage('home')">🏠 Accueil</button>
+            <button class="nav-btn" onclick="showPage('programs')">📋 Programmes</button>
+            <button class="nav-btn" onclick="showPage('create')">➕ Créer</button>
+            <button class="nav-btn" onclick="showPage('workout')">🏋️ Séance</button>
+            <button class="nav-btn" onclick="showPage('progress')">📊 Suivi</button>
+            <button class="nav-btn" onclick="showPage('sports')">⚽ Sports</button>
+        </div>
+
+        <!-- Chrono flottant -->
+        <div class="floating-timer" id="floatingTimer" onclick="showRestTimer()">
+            <span id="floatingTimerDisplay">0</span>
+        </div>
+
+        <!-- Page d'accueil -->
+        <div id="home" class="page active">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3>📊 Cette semaine</h3>
+                    <div class="stat-number" id="weeklyWorkouts">5</div>
+                    <p>Séances complétées</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 71%"></div>
+                    </div>
+                    <small>71% de votre objectif</small>
+                </div>
+
+                <div class="card">
+                    <h3>🎯 Prochaine séance</h3>
+                    <h4>Push (Pectoraux, Épaules)</h4>
+                    <p>Recommandé aujourd'hui</p>
+                    <div class="prediction-box">
+                        <h4>🔮 Prédiction IA</h4>
+                        <p>Développé couché: <strong>82.5kg x 5</strong></p>
+                        <p>Confiance: 89%</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>⚖️ Poids actuel</h3>
+                    <div class="stat-number" id="currentWeight">75.2kg</div>
+                    <p>IMC: <span id="currentBMI">22.1</span> (Normal)</p>
+                    <small>-0.8kg ce mois-ci</small>
+                </div>
+
+                <div class="card">
+                    <h3>🏆 Record récent</h3>
+                    <div class="stat-number">87.5kg</div>
+                    <p>Développé couché (nouveau PR!)</p>
+                    <small>+2.5kg cette semaine</small>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>⚡ Actions rapides</h3>
+                <button class="btn" onclick="startQuickWorkout()">🚀 Démarrer Push Day</button>
+                <button class="btn btn-secondary" onclick="showPage('create')">➕ Nouveau programme</button>
+                <button class="btn btn-secondary" onclick="addWeightEntry()">⚖️ Peser</button>
+            </div>
+        </div>
+
+        <!-- Liste des programmes -->
+        <div id="programs" class="page">
+            <h2>📋 Mes Programmes</h2>
+            
+            <div class="form-group">
+                <input type="text" id="searchPrograms" placeholder="Rechercher un programme..." onkeyup="filterPrograms()">
+            </div>
+
+            <div class="program-list" id="programList">
+                <!-- Les programmes seront générés dynamiquement -->
+            </div>
+
+            <button class="btn" onclick="showPage('create')">➕ Créer un nouveau programme</button>
+        </div>
+
+        <!-- Créer un entraînement -->
+        <div id="create" class="page">
+            <h2>➕ Créer un programme</h2>
+            
+            <div class="form-group">
+                <label>Nom du programme</label>
+                <input type="text" id="workoutName" placeholder="Ex: Mon Push Day Personnalisé">
+            </div>
+
+            <div class="form-group">
+                <label>Type de programme</label>
+                <select id="workoutType" onchange="updateExerciseSelector()">
+                    <option value="push">Push (Pectoraux, Épaules, Triceps)</option>
+                    <option value="pull">Pull (Dos, Biceps)</option>
+                    <option value="legs">Legs (Jambes, Fessiers)</option>
+                    <option value="upper">Haut du corps</option>
+                    <option value="lower">Bas du corps</option>
+                    <option value="full">Full body</option>
+                    <option value="strength">Force pure</option>
+                    <option value="hypertrophy">Hypertrophie</option>
+                    <option value="endurance">Endurance musculaire</option>
+                    <option value="sport">Spécifique sport</option>
+                    <option value="custom">Personnalisé</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Sélectionner les exercices</label>
+                <div id="exerciseSelector">
+                    <!-- Les exercices seront ajoutés dynamiquement -->
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Exercices sélectionnés</label>
+                <div id="selectedExercises">
+                    <p style="color: #666; font-style: italic;">Aucun exercice sélectionné</p>
+                </div>
+            </div>
+
+            <div class="timer-settings">
+                <h3>⏰ Paramètres du chrono</h3>
+                <div class="form-group">
+                    <label>Temps de repos par défaut (secondes)</label>
+                    <input type="number" id="defaultRestTime" value="90" min="30" max="300">
+                </div>
+                <div class="form-group">
+                    <label>Auto-démarrage du chrono</label>
+                    <select id="autoStartTimer">
+                        <option value="true">Oui, démarrer automatiquement</option>
+                        <option value="false">Non, démarrage manuel</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea id="workoutNotes" rows="3" placeholder="Objectifs, recommandations..."></textarea>
+            </div>
+
+            <button class="btn" onclick="saveWorkout()">💾 Sauvegarder le programme</button>
+        </div>
+
+        <!-- Séance active -->
+        <div id="workout" class="page">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 id="activeWorkoutTitle">🏋️ Push Day</h2>
+                <span id="workoutTimer" style="font-size: 1.2em; font-weight: bold; color: #4CAF50;">00:00</span>
+            </div>
+            
+            <div class="timer-display" id="restTimer">
+                <div>Repos: <span id="restTimeDisplay">90</span>s</div>
+                <div class="timer-controls">
+                    <button class="btn-small" onclick="adjustRestTimer(-15)">-15s</button>
+                    <button class="btn-small" onclick="pauseRestTimer()" id="pauseBtn">⏸️</button>
+                    <button class="btn-small" onclick="skipRestTimer()">Skip</button>
+                    <button class="btn-small" onclick="adjustRestTimer(15)">+15s</button>
+                </div>
+                <div style="margin-top: 10px;">
+                    <button class="btn-small btn-secondary" onclick="customRestTime()">⚙️ Personnaliser</button>
+                </div>
+            </div>
+            
+            <div class="exercise-list" id="activeWorkoutList">
+                <!-- Les exercices de la séance active seront ajoutés ici -->
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <button class="btn btn-danger" onclick="finishWorkout()">🏁 Terminer la séance</button>
+                <button class="btn btn-secondary" onclick="pauseWorkout()">⏸️ Mettre en pause</button>
+            </div>
+        </div>
+
+        <!-- Suivi et progrès -->
+        <div id="progress" class="page">
+            <h2>📊 Suivi & Progrès</h2>
+            
+            <div class="dashboard-grid">
+                <!-- Bloc graphique progression -->
+                <div class="card" style="min-width:320px;">
+                    <h3>📈 Progression des exercices</h3>
+                    <div class="form-group">
+                        <select id="exerciseSelect" onchange="updateProgressChart()">
+                            <option value="bench_press">Développé couché</option>
+                            <option value="squat">Squat</option>
+                            <option value="deadlift">Soulevé de terre</option>
+                            <option value="pull_ups">Tractions</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Bloc historique séances -->
+                <div class="card" style="min-width:320px;">
+                    <h3>📜 Historique des séances</h3>
+                    <div class="workout-history" id="workoutHistory"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Fin du contenu principal -->
+    </div>
+    <!-- Ajoutez ici vos scripts JavaScript -->
+    <script>
+        // Placez ici vos fonctions JavaScript telles que showPage, startQuickWorkout, addWeightEntry, etc.
+        // Exemple minimal pour éviter les erreurs de fonctions manquantes :
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(function(page) {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+            // Active le bouton correspondant
+            var btns = document.querySelectorAll('.nav-btn');
+            btns.forEach(function(btn) {
+                if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(pageId)) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        // Ajoutez ici des stubs pour toutes les fonctions utilisées dans le HTML pour éviter les erreurs JS
+        function startQuickWorkout() {}
+        function addWeightEntry() {}
+        function filterPrograms() {}
+        function updateExerciseSelector() {}
+        function saveWorkout() {}
+        function showRestTimer() {}
+        function adjustRestTimer() {}
+        function pauseRestTimer() {}
+        function skipRestTimer() {}
+        function customRestTime() {}
+        function finishWorkout() {
+            if (!programmeActif) return;
+            // Récupère les stats de la séance
+            const stats = [];
+            document.querySelectorAll('#activeWorkoutList .exercise-item').forEach((exDiv, exIdx) => {
+                const exName = programmeActif.exercices[exIdx];
+                exDiv.querySelectorAll('tr.set-input').forEach((tr, setIdx) => {
+                    const reps = parseInt(tr.querySelector('.reps-input').value, 10) || 0;
+                    const poids = parseFloat(tr.querySelector('.weight-input').value) || 0;
+                    const fait = tr.querySelector('.set-done').checked;
+                    stats.push({
+                        exercice: exName,
+                        serie: setIdx + 1,
+                        reps,
+                        poids,
+                        fait
+                    });
+                });
+            });
+            // Ajoute à l’historique
+            historiqueSeances.push({
+                date: new Date().toISOString(),
+                programme: programmeActif.name,
+                stats
+            });
+            localStorage.setItem('historiqueSeances', JSON.stringify(historiqueSeances));
+            alert("Séance enregistrée !");
+            showPage('progress');
+            afficherHistoriqueSeances();
+        }
+        function pauseWorkout() {}
+        function updateMealSuggestions() {}
+        function updateProgressChart() {
+    const exo = document.getElementById('exerciseSelect').value;
+    // Récupère les séances pour cet exercice
+    const data = [];
+    historiqueSeances.forEach(seance => {
+        seance.stats.forEach(s => {
+            if (
+                (exo === "bench_press" && s.exercice.includes("Développé couché")) ||
+                (exo === "squat" && s.exercice.toLowerCase().includes("squat")) ||
+                (exo === "deadlift" && s.exercice.toLowerCase().includes("soulevé de terre")) ||
+                (exo === "pull_ups" && s.exercice.toLowerCase().includes("traction"))
+            ) {
+                data.push({
+                    date: seance.date,
+                    poids: s.poids,
+                    reps: s.reps
+                });
+            }
+        });
+    });
+    // Trie par date
+    data.sort((a, b) => new Date(a.date) - new Date(b.date));
+    // Affiche le graphique
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    if (window.progressChartInstance) window.progressChartInstance.destroy();
+    window.progressChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(d => new Date(d.date).toLocaleDateString('fr-FR')),
+            datasets: [{
+                label: 'Poids (kg)',
+                data: data.map(d => d.poids),
+                borderColor: '#4CAF50',
+                backgroundColor: 'rgba(76,175,80,0.1)',
+                yAxisID: 'y',
+            },{
+                label: 'Reps',
+                data: data.map(d => d.reps),
+                borderColor: '#2196F3',
+                backgroundColor: 'rgba(33,150,243,0.1)',
+                yAxisID: 'y1',
+            }]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            stacked: false,
+            plugins: { legend: { position: 'top' } },
+            scales: {
+                y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Poids (kg)' } },
+                y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Reps' }, grid: { drawOnChartArea: false } }
+            }
+        }
+    });
+}
+
+                    // Exercices par type de programme
+                    const exercicesParType = {
+                        push: [
+                            "Développé couché",
+                            "Développé incliné",
+                            "Écarté haltères",
+                            "Pompes",
+                            "Développé militaire",
+                            "Dips",
+                            "Élévations latérales"
+                        ],
+                        pull: [
+                            "Tractions",
+                            "Rowing barre",
+                            "Rowing haltère",
+                            "Curl biceps",
+                            "Curl marteau",
+                            "Tirage horizontal",
+                            "Face pull"
+                        ],
+                        legs: [
+                            "Squat",
+                            "Soulevé de terre jambes tendues",
+                            "Fentes",
+                            "Presse à jambes",
+                            "Mollets debout",
+                            "Leg curl",
+                            "Leg extension"
+                        ],
+                        upper: [
+                            "Développé couché",
+                            "Tractions",
+                            "Rowing barre",
+                            "Développé militaire",
+                            "Curl biceps",
+                            "Dips"
+                        ],
+                        lower: [
+                            "Squat",
+                            "Soulevé de terre",
+                            "Fentes",
+                            "Mollets debout",
+                            "Leg curl",
+                            "Leg extension"
+                        ],
+                        full: [
+                            "Développé couché",
+                            "Tractions",
+                            "Squat",
+                            "Soulevé de terre",
+                            "Pompes",
+                            "Fentes"
+                        ],
+                        strength: [
+                            "Développé couché",
+                            "Squat",
+                            "Soulevé de terre",
+                            "Tractions",
+                            "Développé militaire"
+                        ],
+                        hypertrophy: [
+                            "Développé incliné",
+                            "Écarté haltères",
+                            "Rowing haltère",
+                            "Curl biceps",
+                            "Fentes",
+                            "Mollets debout"
+                        ],
+                        endurance: [
+                            "Pompes",
+                            "Tractions",
+                            "Fentes",
+                            "Squat",
+                            "Burpees",
+                            "Mountain climbers"
+                        ],
+                        sport: [
+                            "Sprints",
+                            "Pliométrie",
+                            "Agilité échelle",
+                            "Box jump",
+                            "Gainage"
+                        ],
+                        custom: [
+                            "Développé couché",
+                            "Développé incliné",
+                            "Écarté haltères",
+                            "Pompes",
+                            "Tractions",
+                            "Rowing barre",
+                            "Curl biceps",
+                            "Squat",
+                            "Soulevé de terre"
+                        ]
+                    };
+
+                    // Stocke les exercices sélectionnés
+                    let exercicesSelectionnes = [];
+
+                    function updateExerciseSelector() {
+                        const selector = document.getElementById('exerciseSelector');
+                        selector.innerHTML = '';
+                        const type = document.getElementById('workoutType').value;
+                        const exercicesDisponibles = exercicesParType[type] || exercicesParType['custom'];
+                        exercicesDisponibles.forEach(ex => {
+                            const btn = document.createElement('button');
+                            btn.className = 'exercise-btn';
+                            btn.textContent = ex;
+                            btn.onclick = function() {
+                                if (!exercicesSelectionnes.includes(ex)) {
+                                    exercicesSelectionnes.push(ex);
+                                    updateSelectedExercises();
+                                    btn.classList.add('selected');
+                                } else {
+                                    exercicesSelectionnes = exercicesSelectionnes.filter(e => e !== ex);
+                                    updateSelectedExercises();
+                                    btn.classList.remove('selected');
+                                }
+                            };
+                            if (exercicesSelectionnes.includes(ex)) {
+                                btn.classList.add('selected');
+                            }
+                            selector.appendChild(btn);
+                        });
+                    }
+
+                    function updateSelectedExercises() {
+                        const selectedDiv = document.getElementById('selectedExercises');
+                        if (exercicesSelectionnes.length === 0) {
+                            selectedDiv.innerHTML = '<p style="color: #666; font-style: italic;">Aucun exercice sélectionné</p>';
+                        } else {
+                            selectedDiv.innerHTML = exercicesSelectionnes.map(ex => `<span class="exercise-btn selected" style="margin:2px;">${ex}</span>`).join('');
+                        }
+                    }
+
+                    // Réinitialise la sélection si on change de type de programme
+                    document.getElementById('workoutType').addEventListener('change', function() {
+                        exercicesSelectionnes = [];
+                        updateSelectedExercises();
+                        updateExerciseSelector();
+                    });
+
+                    // Affiche la liste au chargement de la page "Créer"
+                    document.addEventListener('DOMContentLoaded', function() {
+                        if (document.getElementById('create').classList.contains('active')) {
+                            updateExerciseSelector();
+                        }
+                    });
+
+                    // Tableau pour stocker les programmes (utilise localStorage pour la persistance)
+                    let programmes = JSON.parse(localStorage.getItem('programmes') || '[]');
+                    let historiqueSeances = JSON.parse(localStorage.getItem('historiqueSeances') || '[]');
+
+                    function saveWorkout() {
+                        const name = document.getElementById('workoutName').value.trim();
+                        const type = document.getElementById('workoutType').value;
+                        const notes = document.getElementById('workoutNotes').value.trim();
+                        const rest = parseInt(document.getElementById('defaultRestTime').value, 10);
+                        const autoStart = document.getElementById('autoStartTimer').value === "true";
+                        if (!name || exercicesSelectionnes.length === 0) {
+                            alert("Merci de donner un nom au programme et de sélectionner au moins un exercice.");
+                            return;
+                        }
+                        const programme = {
+                            name,
+                            type,
+                            exercices: [...exercicesSelectionnes],
+                            notes,
+                            rest,
+                            autoStart
+                        };
+                        programmes.push(programme);
+                        localStorage.setItem('programmes', JSON.stringify(programmes));
+                        afficherProgrammes();
+                        showPage('programs');
+                        // Réinitialise le formulaire
+                        document.getElementById('workoutName').value = '';
+                        document.getElementById('workoutNotes').value = '';
+                        exercicesSelectionnes = [];
+                        updateSelectedExercises();
+                        updateExerciseSelector();
+                    }
+
+                    function afficherProgrammes() {
+                        const list = document.getElementById('programList');
+                        list.innerHTML = '';
+                        if (programmes.length === 0) {
+                            list.innerHTML = '<p style="color:#666;text-align:center;">Aucun programme enregistré.</p>';
+                            return;
+                        }
+                        programmes.forEach((prog, idx) => {
+                            const div = document.createElement('div');
+                            div.className = 'program-card';
+                            div.innerHTML = `
+                                <h4 style="cursor:pointer;" onclick="lancerProgramme(${idx})">${prog.name} <small style="font-weight:normal;color:#888;">(${prog.type})</small></h4>
+                                <div>
+                                    <strong>Exercices :</strong> ${prog.exercices.join(', ')}
+                                </div>
+                                <div style="margin-top:8px;">
+                                    <button class="btn-small btn-danger" onclick="supprimerProgramme(${idx});event.stopPropagation();">Supprimer</button>
+                                </div>
+                            `;
+                            list.appendChild(div);
+                        });
+                    }
+
+                    function supprimerProgramme(idx) {
+                        if (confirm("Supprimer ce programme ?")) {
+                            programmes.splice(idx, 1);
+                            localStorage.setItem('programmes', JSON.stringify(programmes));
+                            afficherProgrammes();
+                        }
+                    }
+
+                    // Affiche la liste au chargement de la page
+                    document.addEventListener('DOMContentLoaded', afficherProgrammes);
+
+                    // Affiche la liste quand on va sur la page "programs"
+                    function showPage(pageId) {
+                        document.querySelectorAll('.page').forEach(function(page) {
+                            page.classList.remove('active');
+                        });
+                        document.getElementById(pageId).classList.add('active');
+                        document.querySelectorAll('.nav-btn').forEach(function(btn) {
+                            btn.classList.remove('active');
+                        });
+                        var btns = document.querySelectorAll('.nav-btn');
+                        btns.forEach(function(btn) {
+                            if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(pageId)) {
+                                btn.classList.add('active');
+                            }
+                        });
+                        if (pageId === 'programs') afficherProgrammes();
+                        if (pageId === 'create') updateExerciseSelector();
+                        if (pageId === 'progress') afficherHistoriqueSeances();
+                    }
+
+                    let programmeActif = null;
+
+                    function lancerProgramme(idx) {
+                        programmeActif = programmes[idx];
+                        showPage('workout');
+                        afficherSeanceActive();
+                    }
+
+                    function afficherSeanceActive() {
+                        if (!programmeActif) return;
+                        document.getElementById('activeWorkoutTitle').textContent = "🏋️ " + programmeActif.name;
+                        const list = document.getElementById('activeWorkoutList');
+                        list.innerHTML = '';
+                        programmeActif.exercices.forEach((ex, exIdx) => {
+        const series = 3;
+        const reps = 10;
+        const exDiv = document.createElement('div');
+        exDiv.className = 'exercise-item';
+        exDiv.innerHTML = `<h4>${ex}</h4>
+            <table class="sets-table">
+                <thead>
+                    <tr>
+                        <th>Série</th>
+                        <th>Reps</th>
+                        <th>Poids (kg)</th>
+                        <th>Fait</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${Array.from({length: series}).map((_, setIdx) => `
+                        <tr class="set-input" data-ex="${exIdx}" data-set="${setIdx}">
+                            <td>${setIdx+1}</td>
+                            <td>
+                                <input type="number" min="1" value="${reps}" class="reps-input" style="width:60px;" placeholder="Reps">
+                            </td>
+                            <td>
+                                <input type="number" min="0" step="0.5" class="weight-input" style="width:70px;" placeholder="Poids">
+                            </td>
+                            <td style="text-align:center;">
+                                <input type="checkbox" class="set-done" style="transform:scale(1.5);" onchange="cocherSerie(this)">
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+        list.appendChild(exDiv);
+    });
+                    }
+                                
+                                function cocherSerie(checkbox) {
+                                    if (checkbox.checked) {
+                                        lancerChronoRepos();
+                                        checkbox.parentElement.classList.add('set-completed');
+                                    } else {
+                                        checkbox.parentElement.classList.remove('set-completed');
+                                    }
+                                }
+                                
+                                let restTimer = null;
+function lancerChronoRepos() {
+    const rest = programmeActif?.rest || 90;
+    let temps = rest;
+    const display = document.getElementById('restTimer');
+    const span = document.getElementById('restTimeDisplay');
+    display.style.display = 'block';
+    span.textContent = temps;
+    clearInterval(restTimer);
+    restTimer = setInterval(() => {
+        temps--;
+        span.textContent = temps;
+        if (temps <= 0) {
+            clearInterval(restTimer);
+            display.style.display = 'none';
+        }
+    }, 1000);
+}
+                            </script>
+                        </body>
+                        </html>
+                        <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
